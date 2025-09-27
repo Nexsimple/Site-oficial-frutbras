@@ -7,21 +7,21 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { useProducts } from "@/hooks/useProducts";
-import { useOrders } from "@/hooks/useOrders";
+import { usePedidos } from "@/hooks/usePedidos"; // Importar o hook usePedidos
 
 const AdminDashboard = () => {
   const { data: products = [] } = useProducts();
-  const { data: orders = [] } = useOrders();
+  const { data: pedidos = [] } = usePedidos(); // Usar usePedidos
 
-  const todayOrders = orders.filter(order => {
+  const todayOrders = pedidos.filter(pedido => {
     const today = new Date().toDateString();
-    const orderDate = new Date(order.created_at).toDateString();
+    const orderDate = new Date(pedido.created_at).toDateString();
     return today === orderDate;
   });
 
-  const totalRevenue = orders
-    .filter(order => order.status === 'delivered')
-    .reduce((sum, order) => sum + (order.total || 0), 0);
+  const totalRevenue = pedidos
+    .filter(pedido => pedido.status === 'entregue') // Usar status 'entregue'
+    .reduce((sum, pedido) => sum + (pedido.valor_total || 0), 0); // Usar valor_total
 
   const stats = [
     {
@@ -35,30 +35,30 @@ const AdminDashboard = () => {
       title: "Pedidos Hoje",
       value: todayOrders.length.toString(),
       icon: ShoppingCart,
-      change: `${orders.filter(o => o.status === 'pending').length} pendentes`,
+      change: `${pedidos.filter(o => o.status === 'pendente').length} pendentes`, // Usar status 'pendente'
       changeType: "warning"
     },
     {
       title: "Total de Pedidos", 
-      value: orders.length.toString(),
+      value: pedidos.length.toString(),
       icon: Users,
-      change: `${orders.filter(o => o.status === 'delivered').length} entregues`,
+      change: `${pedidos.filter(o => o.status === 'entregue').length} entregues`, // Usar status 'entregue'
       changeType: "positive"
     },
     {
       title: "Receita Total",
       value: `R$ ${totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
       icon: TrendingUp,
-      change: `${orders.filter(o => o.status === 'delivered').length} pedidos`,
+      change: `${pedidos.filter(o => o.status === 'entregue').length} pedidos`, // Usar status 'entregue'
       changeType: "positive"
     }
   ];
 
   const recentActivities = [
-    ...orders.slice(0, 4).map(order => ({
-      action: `Pedido #${order.id?.slice(-6)} - ${order.status}`,
-      time: new Date(order.created_at).toLocaleDateString('pt-BR'),
-      status: order.status
+    ...pedidos.slice(0, 4).map(pedido => ({
+      action: `Pedido #${pedido.numero_pedido} - ${pedido.status}`, // Usar numero_pedido
+      time: new Date(pedido.created_at).toLocaleDateString('pt-BR'),
+      status: pedido.status
     }))
   ];
 
@@ -115,12 +115,13 @@ const AdminDashboard = () => {
                     <p className="text-sm text-muted-foreground">{activity.time}</p>
                   </div>
                   <Badge variant={
-                    activity.status === 'delivered' ? 'default' : 
-                    activity.status === 'pending' ? 'secondary' : 'outline'
+                    activity.status === 'entregue' ? 'default' : // Usar status 'entregue'
+                    activity.status === 'pendente' ? 'secondary' : // Usar status 'pendente'
+                    activity.status === 'confirmado' ? 'default' : 'destructive' // Usar status 'confirmado' e 'cancelado'
                   }>
-                    {activity.status === 'delivered' ? 'Entregue' :
-                     activity.status === 'pending' ? 'Pendente' :
-                     activity.status === 'confirmed' ? 'Confirmado' : 'Cancelado'}
+                    {activity.status === 'entregue' ? 'Entregue' :
+                     activity.status === 'pendente' ? 'Pendente' :
+                     activity.status === 'confirmado' ? 'Confirmado' : 'Cancelado'}
                   </Badge>
                 </div>
               ))
