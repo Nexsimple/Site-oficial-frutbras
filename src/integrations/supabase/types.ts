@@ -77,6 +77,42 @@ export type Database = {
         }
         Relationships: []
       }
+      pedidos: {
+        Row: {
+          created_at: string
+          cliente_info: Json
+          id: string
+          itens: Json
+          numero_pedido: string
+          status: Database["public"]["Enums"]["order_status"]
+          updated_at: string
+          user_id: string | null
+          valor_total: number | null
+        }
+        Insert: {
+          created_at?: string
+          cliente_info?: Json
+          id?: string
+          itens?: Json
+          numero_pedido?: string
+          status?: Database["public"]["Enums"]["order_status"]
+          updated_at?: string
+          user_id?: string | null
+          valor_total?: number | null
+        }
+        Update: {
+          created_at?: string
+          cliente_info?: Json
+          id?: string
+          itens?: Json
+          numero_pedido?: string
+          status?: Database["public"]["Enums"]["order_status"]
+          updated_at?: string
+          user_id?: string | null
+          valor_total?: number | null
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           category: string | null
