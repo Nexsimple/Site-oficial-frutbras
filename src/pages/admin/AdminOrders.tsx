@@ -37,7 +37,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { usePedidos, useAtualizarStatusPedido, useExcluirPedido } from "@/hooks/usePedidos"; // Alterado para usePedidos
+import { usePedidos, useAtualizarStatusPedido, useExcluirPedido } from "@/hooks/usePedidos";
 
 const statusOptions = [
   { value: "all", label: "Todos os Status" },
@@ -50,31 +50,31 @@ const statusOptions = [
 const AdminOrders = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [selectedPedido, setSelectedPedido] = useState<any>(null); // Renomeado para selectedPedido
+  const [selectedPedido, setSelectedPedido] = useState<any>(null);
 
-  const { data: pedidos = [], isLoading } = usePedidos(); // Alterado para usePedidos e 'pedidos'
-  const atualizarStatusPedidoMutation = useAtualizarStatusPedido(); // Alterado para useAtualizarStatusPedido
-  const excluirPedidoMutation = useExcluirPedido(); // Alterado para useExcluirPedido
+  const { data: pedidos = [], isLoading } = usePedidos();
+  const atualizarStatusPedidoMutation = useAtualizarStatusPedido();
+  const excluirPedidoMutation = useExcluirPedido();
 
-  const filteredPedidos = pedidos.filter((pedido: any) => { // Alterado para 'pedidos'
+  const filteredPedidos = pedidos.filter((pedido: any) => {
     const matchesSearch = pedido.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         pedido.cliente_info?.name?.toLowerCase().includes(searchTerm.toLowerCase()) || // Alterado para cliente_info
-                         pedido.cliente_info?.email?.toLowerCase().includes(searchTerm.toLowerCase()); // Alterado para cliente_info
+                         pedido.cliente_info?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         pedido.cliente_info?.email?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesStatus = statusFilter === "all" || pedido.status === statusFilter;
     
     return matchesSearch && matchesStatus;
   });
 
-  const handleStatusUpdate = async (pedidoId: string, newStatus: string) => { // Alterado para 'pedidoId'
-    atualizarStatusPedidoMutation.mutate({ // Alterado para atualizarStatusPedidoMutation
+  const handleStatusUpdate = async (pedidoId: string, newStatus: string) => {
+    atualizarStatusPedidoMutation.mutate({
       id: pedidoId,
       status: newStatus as any
     });
   };
 
-  const handleDeletePedido = (pedidoId: string) => { // Alterado para 'pedidoId'
-    excluirPedidoMutation.mutate(pedidoId); // Alterado para excluirPedidoMutation
+  const handleDeletePedido = (pedidoId: string) => {
+    excluirPedidoMutation.mutate(pedidoId);
   };
 
   const getStatusBadge = (status: string) => {
@@ -154,7 +154,7 @@ const AdminOrders = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredPedidos.map((pedido: any) => ( // Alterado para 'pedido'
+              {filteredPedidos.map((pedido: any) => (
                 <TableRow key={pedido.id}>
                   <TableCell>
                     <code className="text-sm bg-muted px-2 py-1 rounded">
@@ -163,8 +163,8 @@ const AdminOrders = () => {
                   </TableCell>
                   <TableCell>
                     <div>
-                      <p className="font-medium">{pedido.cliente_info?.name || "N/A"}</p> {/* Alterado para cliente_info */}
-                      <p className="text-sm text-muted-foreground">{pedido.cliente_info?.email || "N/A"}</p> {/* Alterado para cliente_info */}
+                      <p className="font-medium">{pedido.cliente_info?.name || "N/A"}</p>
+                      <p className="text-sm text-muted-foreground">{pedido.cliente_info?.email || "N/A"}</p>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -172,7 +172,7 @@ const AdminOrders = () => {
                   </TableCell>
                   <TableCell>
                     <span className="font-medium">
-                      R$ {pedido.valor_total?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'} {/* Alterado para valor_total */}
+                      R$ {pedido.valor_total?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'}
                     </span>
                   </TableCell>
                   <TableCell>
@@ -185,7 +185,7 @@ const AdminOrders = () => {
                           <Button 
                             variant="ghost" 
                             size="sm"
-                            onClick={() => setSelectedPedido(pedido)} // Alterado para setSelectedPedido
+                            onClick={() => setSelectedPedido(pedido)}
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
@@ -194,16 +194,16 @@ const AdminOrders = () => {
                           <DialogHeader>
                             <DialogTitle>Detalhes do Pedido #{pedido.id?.slice(-8)}</DialogTitle>
                           </DialogHeader>
-                          {selectedPedido && ( // Alterado para selectedPedido
+                          {selectedPedido && (
                             <div className="space-y-6">
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-3">
                                   <h4 className="font-semibold">Cliente</h4>
                                   <div className="space-y-2 text-sm p-3 bg-muted rounded-md">
-                                    <p className="flex items-center"><User className="h-4 w-4 mr-2 text-muted-foreground" /> {selectedPedido.cliente_info?.name || 'N/A'}</p> {/* Alterado para cliente_info */}
-                                    <p className="flex items-center"><Mail className="h-4 w-4 mr-2 text-muted-foreground" /> {selectedPedido.cliente_info?.email || 'N/A'}</p> {/* Alterado para cliente_info */}
-                                    <p className="flex items-center"><Phone className="h-4 w-4 mr-2 text-muted-foreground" /> {selectedPedido.cliente_info?.phone || 'N/A'}</p> {/* Alterado para cliente_info */}
-                                    <p className="flex items-center"><FileText className="h-4 w-4 mr-2 text-muted-foreground" /> {selectedPedido.cliente_info?.document || 'N/A'}</p> {/* Alterado para cliente_info */}
+                                    <p className="flex items-center"><User className="h-4 w-4 mr-2 text-muted-foreground" /> {selectedPedido.cliente_info?.name || 'N/A'}</p>
+                                    <p className="flex items-center"><Mail className="h-4 w-4 mr-2 text-muted-foreground" /> {selectedPedido.cliente_info?.email || 'N/A'}</p>
+                                    <p className="flex items-center"><Phone className="h-4 w-4 mr-2 text-muted-foreground" /> {selectedPedido.cliente_info?.phone || 'N/A'}</p>
+                                    <p className="flex items-center"><FileText className="h-4 w-4 mr-2 text-muted-foreground" /> {selectedPedido.cliente_info?.document || 'N/A'}</p>
                                   </div>
                                 </div>
                                 
@@ -211,13 +211,13 @@ const AdminOrders = () => {
                                   <h4 className="font-semibold">Endereço de Entrega</h4>
                                   <div className="space-y-2 text-sm p-3 bg-muted rounded-md">
                                     <p className="flex items-start"><MapPin className="h-4 w-4 mr-2 mt-0.5 text-muted-foreground flex-shrink-0" /> 
-                                      {selectedPedido.cliente_info?.street}, {selectedPedido.cliente_info?.number} {selectedPedido.cliente_info?.complement && `- ${selectedPedido.cliente_info.complement}`} {/* Alterado para cliente_info */}
+                                      {selectedPedido.cliente_info?.street}, {selectedPedido.cliente_info?.number} {selectedPedido.cliente_info?.complement && `- ${selectedPedido.cliente_info.complement}`}
                                     </p>
                                     <p className="flex items-center"><Home className="h-4 w-4 mr-2 text-muted-foreground" /> 
-                                      {selectedPedido.cliente_info?.neighborhood} - {selectedPedido.cliente_info?.city}, {selectedPedido.cliente_info?.state} {/* Alterado para cliente_info */}
+                                      {selectedPedido.cliente_info?.neighborhood} - {selectedPedido.cliente_info?.city}, {selectedPedido.cliente_info?.state}
                                     </p>
                                     <p className="flex items-center"><Building className="h-4 w-4 mr-2 text-muted-foreground" /> 
-                                      CEP: {selectedPedido.cliente_info?.zipCode} {/* Alterado para cliente_info */}
+                                      CEP: {selectedPedido.cliente_info?.zipCode}
                                     </p>
                                   </div>
                                 </div>
@@ -245,7 +245,7 @@ const AdminOrders = () => {
                               <div>
                                 <h4 className="font-semibold mb-2">Itens do Pedido</h4>
                                 <div className="space-y-2 border rounded-md">
-                                  {selectedPedido.itens?.map((item: any, index: number) => ( // Alterado para 'itens'
+                                  {selectedPedido.itens?.map((item: any, index: number) => (
                                     <div key={index} className="flex justify-between p-3 text-sm border-b last:border-b-0">
                                       <div>
                                         <p className="font-medium">{item.product_name}</p>
@@ -256,7 +256,7 @@ const AdminOrders = () => {
                                   ))}
                                   <div className="flex justify-between font-bold p-3 bg-muted rounded-b-md">
                                     <span>Total:</span>
-                                    <span>R$ {selectedPedido.valor_total?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span> {/* Alterado para valor_total */}
+                                    <span>R$ {selectedPedido.valor_total?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                                   </div>
                                 </div>
                               </div>
@@ -274,18 +274,18 @@ const AdminOrders = () => {
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
-                        </DialogTrigger>
+                        </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
                             <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Tem certeza que deseja excluir o pedido #{pedido.id?.slice(-8)}? Esta ação não pode ser desfeita. {/* Alterado para 'pedido' */}
+                              Tem certeza que deseja excluir o pedido #{pedido.id?.slice(-8)}? Esta ação não pode ser desfeita.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>Cancelar</AlertDialogCancel>
                             <AlertDialogAction
-                              onClick={() => handleDeletePedido(pedido.id)} // Alterado para handleDeletePedido
+                              onClick={() => handleDeletePedido(pedido.id)}
                               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                             >
                               Excluir
