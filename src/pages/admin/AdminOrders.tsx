@@ -37,44 +37,44 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useOrders, useUpdateOrderStatus, useDeleteOrder } from "@/hooks/useOrders";
+import { usePedidos, useAtualizarStatusPedido, useExcluirPedido } from "@/hooks/usePedidos"; // Alterado para usePedidos
 
 const statusOptions = [
   { value: "all", label: "Todos os Status" },
-  { value: "pending", label: "Pendente", icon: Package, color: "secondary" },
-  { value: "confirmed", label: "Confirmado", icon: CheckCircle, color: "default" },
-  { value: "delivered", label: "Entregue", icon: Truck, color: "default" },
-  { value: "cancelled", label: "Cancelado", icon: XCircle, color: "destructive" },
+  { value: "pendente", label: "Pendente", icon: Package, color: "secondary" },
+  { value: "confirmado", label: "Confirmado", icon: CheckCircle, color: "default" },
+  { value: "entregue", label: "Entregue", icon: Truck, color: "default" },
+  { value: "cancelado", label: "Cancelado", icon: XCircle, color: "destructive" },
 ];
 
 const AdminOrders = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [selectedPedido, setSelectedPedido] = useState<any>(null); // Renomeado para selectedPedido
 
-  const { data: orders = [], isLoading } = useOrders();
-  const updateOrderStatusMutation = useUpdateOrderStatus();
-  const deleteOrderMutation = useDeleteOrder();
+  const { data: pedidos = [], isLoading } = usePedidos(); // Alterado para usePedidos e 'pedidos'
+  const atualizarStatusPedidoMutation = useAtualizarStatusPedido(); // Alterado para useAtualizarStatusPedido
+  const excluirPedidoMutation = useExcluirPedido(); // Alterado para useExcluirPedido
 
-  const filteredOrders = orders.filter((order: any) => {
-    const matchesSearch = order.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         order.customer_info?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         order.customer_info?.email?.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredPedidos = pedidos.filter((pedido: any) => { // Alterado para 'pedidos'
+    const matchesSearch = pedido.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         pedido.cliente_info?.name?.toLowerCase().includes(searchTerm.toLowerCase()) || // Alterado para cliente_info
+                         pedido.cliente_info?.email?.toLowerCase().includes(searchTerm.toLowerCase()); // Alterado para cliente_info
     
-    const matchesStatus = statusFilter === "all" || order.status === statusFilter;
+    const matchesStatus = statusFilter === "all" || pedido.status === statusFilter;
     
     return matchesSearch && matchesStatus;
   });
 
-  const handleStatusUpdate = async (orderId: string, newStatus: string) => {
-    updateOrderStatusMutation.mutate({
-      id: orderId,
+  const handleStatusUpdate = async (pedidoId: string, newStatus: string) => { // Alterado para 'pedidoId'
+    atualizarStatusPedidoMutation.mutate({ // Alterado para atualizarStatusPedidoMutation
+      id: pedidoId,
       status: newStatus as any
     });
   };
 
-  const handleDeleteOrder = (orderId: string) => {
-    deleteOrderMutation.mutate(orderId);
+  const handleDeletePedido = (pedidoId: string) => { // Alterado para 'pedidoId'
+    excluirPedidoMutation.mutate(pedidoId); // Alterado para excluirPedidoMutation
   };
 
   const getStatusBadge = (status: string) => {
@@ -136,7 +136,7 @@ const AdminOrders = () => {
             </Select>
 
             <Badge variant="secondary">
-              {filteredOrders.length} pedido(s)
+              {filteredPedidos.length} pedido(s)
             </Badge>
           </div>
         </CardHeader>
@@ -154,29 +154,29 @@ const AdminOrders = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredOrders.map((order: any) => (
-                <TableRow key={order.id}>
+              {filteredPedidos.map((pedido: any) => ( // Alterado para 'pedido'
+                <TableRow key={pedido.id}>
                   <TableCell>
                     <code className="text-sm bg-muted px-2 py-1 rounded">
-                      #{order.id?.slice(-8)}
+                      #{pedido.id?.slice(-8)}
                     </code>
                   </TableCell>
                   <TableCell>
                     <div>
-                      <p className="font-medium">{order.customer_info?.name || "N/A"}</p>
-                      <p className="text-sm text-muted-foreground">{order.customer_info?.email || "N/A"}</p>
+                      <p className="font-medium">{pedido.cliente_info?.name || "N/A"}</p> {/* Alterado para cliente_info */}
+                      <p className="text-sm text-muted-foreground">{pedido.cliente_info?.email || "N/A"}</p> {/* Alterado para cliente_info */}
                     </div>
                   </TableCell>
                   <TableCell>
-                    {new Date(order.created_at).toLocaleDateString('pt-BR')}
+                    {new Date(pedido.created_at).toLocaleDateString('pt-BR')}
                   </TableCell>
                   <TableCell>
                     <span className="font-medium">
-                      R$ {order.total?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'}
+                      R$ {pedido.valor_total?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'} {/* Alterado para valor_total */}
                     </span>
                   </TableCell>
                   <TableCell>
-                    {getStatusBadge(order.status)}
+                    {getStatusBadge(pedido.status)}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end space-x-2">
@@ -185,25 +185,25 @@ const AdminOrders = () => {
                           <Button 
                             variant="ghost" 
                             size="sm"
-                            onClick={() => setSelectedOrder(order)}
+                            onClick={() => setSelectedPedido(pedido)} // Alterado para setSelectedPedido
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
                         </DialogTrigger>
                         <DialogContent className="max-w-3xl">
                           <DialogHeader>
-                            <DialogTitle>Detalhes do Pedido #{order.id?.slice(-8)}</DialogTitle>
+                            <DialogTitle>Detalhes do Pedido #{pedido.id?.slice(-8)}</DialogTitle>
                           </DialogHeader>
-                          {selectedOrder && (
+                          {selectedPedido && ( // Alterado para selectedPedido
                             <div className="space-y-6">
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-3">
                                   <h4 className="font-semibold">Cliente</h4>
                                   <div className="space-y-2 text-sm p-3 bg-muted rounded-md">
-                                    <p className="flex items-center"><User className="h-4 w-4 mr-2 text-muted-foreground" /> {selectedOrder.customer_info?.name || 'N/A'}</p>
-                                    <p className="flex items-center"><Mail className="h-4 w-4 mr-2 text-muted-foreground" /> {selectedOrder.customer_info?.email || 'N/A'}</p>
-                                    <p className="flex items-center"><Phone className="h-4 w-4 mr-2 text-muted-foreground" /> {selectedOrder.customer_info?.phone || 'N/A'}</p>
-                                    <p className="flex items-center"><FileText className="h-4 w-4 mr-2 text-muted-foreground" /> {selectedOrder.customer_info?.document || 'N/A'}</p>
+                                    <p className="flex items-center"><User className="h-4 w-4 mr-2 text-muted-foreground" /> {selectedPedido.cliente_info?.name || 'N/A'}</p> {/* Alterado para cliente_info */}
+                                    <p className="flex items-center"><Mail className="h-4 w-4 mr-2 text-muted-foreground" /> {selectedPedido.cliente_info?.email || 'N/A'}</p> {/* Alterado para cliente_info */}
+                                    <p className="flex items-center"><Phone className="h-4 w-4 mr-2 text-muted-foreground" /> {selectedPedido.cliente_info?.phone || 'N/A'}</p> {/* Alterado para cliente_info */}
+                                    <p className="flex items-center"><FileText className="h-4 w-4 mr-2 text-muted-foreground" /> {selectedPedido.cliente_info?.document || 'N/A'}</p> {/* Alterado para cliente_info */}
                                   </div>
                                 </div>
                                 
@@ -211,13 +211,13 @@ const AdminOrders = () => {
                                   <h4 className="font-semibold">Endereço de Entrega</h4>
                                   <div className="space-y-2 text-sm p-3 bg-muted rounded-md">
                                     <p className="flex items-start"><MapPin className="h-4 w-4 mr-2 mt-0.5 text-muted-foreground flex-shrink-0" /> 
-                                      {selectedOrder.customer_info?.street}, {selectedOrder.customer_info?.number} {selectedOrder.customer_info?.complement && `- ${selectedOrder.customer_info.complement}`}
+                                      {selectedPedido.cliente_info?.street}, {selectedPedido.cliente_info?.number} {selectedPedido.cliente_info?.complement && `- ${selectedPedido.cliente_info.complement}`} {/* Alterado para cliente_info */}
                                     </p>
                                     <p className="flex items-center"><Home className="h-4 w-4 mr-2 text-muted-foreground" /> 
-                                      {selectedOrder.customer_info?.neighborhood} - {selectedOrder.customer_info?.city}, {selectedOrder.customer_info?.state}
+                                      {selectedPedido.cliente_info?.neighborhood} - {selectedPedido.cliente_info?.city}, {selectedPedido.cliente_info?.state} {/* Alterado para cliente_info */}
                                     </p>
                                     <p className="flex items-center"><Building className="h-4 w-4 mr-2 text-muted-foreground" /> 
-                                      CEP: {selectedOrder.customer_info?.zipCode}
+                                      CEP: {selectedPedido.cliente_info?.zipCode} {/* Alterado para cliente_info */}
                                     </p>
                                   </div>
                                 </div>
@@ -226,8 +226,8 @@ const AdminOrders = () => {
                               <div>
                                 <h4 className="font-semibold mb-2">Status do Pedido</h4>
                                 <Select 
-                                  value={selectedOrder.status} 
-                                  onValueChange={(value) => handleStatusUpdate(selectedOrder.id, value)}
+                                  value={selectedPedido.status} 
+                                  onValueChange={(value) => handleStatusUpdate(selectedPedido.id, value)}
                                 >
                                   <SelectTrigger className="w-full md:w-1/2">
                                     <SelectValue />
@@ -245,7 +245,7 @@ const AdminOrders = () => {
                               <div>
                                 <h4 className="font-semibold mb-2">Itens do Pedido</h4>
                                 <div className="space-y-2 border rounded-md">
-                                  {selectedOrder.items?.map((item: any, index: number) => (
+                                  {selectedPedido.itens?.map((item: any, index: number) => ( // Alterado para 'itens'
                                     <div key={index} className="flex justify-between p-3 text-sm border-b last:border-b-0">
                                       <div>
                                         <p className="font-medium">{item.product_name}</p>
@@ -256,7 +256,7 @@ const AdminOrders = () => {
                                   ))}
                                   <div className="flex justify-between font-bold p-3 bg-muted rounded-b-md">
                                     <span>Total:</span>
-                                    <span>R$ {selectedOrder.total?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                    <span>R$ {selectedPedido.valor_total?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span> {/* Alterado para valor_total */}
                                   </div>
                                 </div>
                               </div>
@@ -274,18 +274,18 @@ const AdminOrders = () => {
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
-                        </AlertDialogTrigger>
+                        </DialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
                             <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Tem certeza que deseja excluir o pedido #{order.id?.slice(-8)}? Esta ação não pode ser desfeita.
+                              Tem certeza que deseja excluir o pedido #{pedido.id?.slice(-8)}? Esta ação não pode ser desfeita. {/* Alterado para 'pedido' */}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>Cancelar</AlertDialogCancel>
                             <AlertDialogAction
-                              onClick={() => handleDeleteOrder(order.id)}
+                              onClick={() => handleDeletePedido(pedido.id)} // Alterado para handleDeletePedido
                               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                             >
                               Excluir
@@ -300,7 +300,7 @@ const AdminOrders = () => {
             </TableBody>
           </Table>
 
-          {filteredOrders.length === 0 && (
+          {filteredPedidos.length === 0 && (
             <div className="text-center py-8">
               <p className="text-muted-foreground">
                 {searchTerm || statusFilter !== "all" ? "Nenhum pedido encontrado" : "Nenhum pedido cadastrado"}
