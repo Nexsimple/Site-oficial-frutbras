@@ -74,30 +74,30 @@ export const useRealtime = () => {
       .subscribe();
 
     // Canal para pedidos  
-    const ordersChannel = supabase
-      .channel('orders-changes')
+    const pedidosChannel = supabase
+      .channel('pedidos-changes')
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
-          table: 'orders'
+          table: 'pedidos' // Alterado de 'orders' para 'pedidos'
         },
         (payload) => {
-          console.log('Orders realtime update:', payload);
+          console.log('Pedidos realtime update:', payload);
           
           // Invalidar queries de pedidos
-          queryClient.invalidateQueries({ queryKey: ['orders'] });
+          queryClient.invalidateQueries({ queryKey: ['pedidos'] }); // Alterado de 'orders' para 'pedidos'
           
           if (payload.eventType === 'INSERT') {
             toast({
               title: "Novo pedido",
-              description: `Pedido #${payload.new?.id?.slice(-6)} foi criado.`,
+              description: `Pedido #${payload.new?.numero_pedido} foi criado.`, // Usando numero_pedido
             });
           } else if (payload.eventType === 'UPDATE') {
             toast({
               title: "Pedido atualizado",
-              description: `Status do pedido #${payload.new?.id?.slice(-6)} foi alterado.`,
+              description: `Status do pedido #${payload.new?.numero_pedido} foi alterado.`, // Usando numero_pedido
             });
           }
         }
@@ -127,7 +127,7 @@ export const useRealtime = () => {
     return () => {
       supabase.removeChannel(productsChannel);
       supabase.removeChannel(settingsChannel);
-      supabase.removeChannel(ordersChannel);
+      supabase.removeChannel(pedidosChannel); // Alterado de ordersChannel para pedidosChannel
       supabase.removeChannel(auditChannel);
     };
   }, [queryClient]);

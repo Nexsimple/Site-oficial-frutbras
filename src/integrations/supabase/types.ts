@@ -47,36 +47,6 @@ export type Database = {
         }
         Relationships: []
       }
-      orders: {
-        Row: {
-          created_at: string
-          customer_info: Json
-          id: string
-          items: Json
-          status: Database["public"]["Enums"]["order_status"]
-          total: number
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          customer_info?: Json
-          id?: string
-          items?: Json
-          status?: Database["public"]["Enums"]["order_status"]
-          total?: number
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          customer_info?: Json
-          id?: string
-          items?: Json
-          status?: Database["public"]["Enums"]["order_status"]
-          total?: number
-          updated_at?: string
-        }
-        Relationships: []
-      }
       pedidos: {
         Row: {
           created_at: string
@@ -178,6 +148,12 @@ export type Database = {
           site_name: string | null
           updated_at: string
           whatsapp: string | null
+          hero_image_url: string | null
+          premium_fruits_image_url: string | null
+          recipes_hero_title: string | null
+          recipes_hero_subtitle: string | null
+          recipes_hero_image_url: string | null
+          about_page_content: Json | null
         }
         Insert: {
           colors?: Json | null
@@ -192,6 +168,12 @@ export type Database = {
           site_name?: string | null
           updated_at?: string
           whatsapp?: string | null
+          hero_image_url?: string | null
+          premium_fruits_image_url?: string | null
+          recipes_hero_title?: string | null
+          recipes_hero_subtitle?: string | null
+          recipes_hero_image_url?: string | null
+          about_page_content?: Json | null
         }
         Update: {
           colors?: Json | null
@@ -206,6 +188,12 @@ export type Database = {
           site_name?: string | null
           updated_at?: string
           whatsapp?: string | null
+          hero_image_url?: string | null
+          premium_fruits_image_url?: string | null
+          recipes_hero_title?: string | null
+          recipes_hero_subtitle?: string | null
+          recipes_hero_image_url?: string | null
+          about_page_content?: Json | null
         }
         Relationships: []
       }
@@ -221,6 +209,96 @@ export type Database = {
         Update: {
           created_at?: string
           id?: number
+        }
+        Relationships: []
+      }
+      categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          name: string
+          position: number
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          position?: number
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          position?: number
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      recipes: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          difficulty: Database["public"]["Enums"]["recipe_difficulty"] | null
+          id: string
+          image_url: string | null
+          ingredients: string[] | null
+          instructions: string | null
+          is_featured: boolean | null
+          long_desc: string | null
+          prep_time: number | null
+          servings: number | null
+          short_desc: string | null
+          slug: string
+          title: string
+          updated_at: string | null
+          visible: boolean | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          difficulty?: Database["public"]["Enums"]["recipe_difficulty"] | null
+          id?: string
+          image_url?: string | null
+          ingredients?: string[] | null
+          instructions?: string | null
+          is_featured?: boolean | null
+          long_desc?: string | null
+          prep_time?: number | null
+          servings?: number | null
+          short_desc?: string | null
+          slug: string
+          title: string
+          updated_at?: string | null
+          visible?: boolean | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          difficulty?: Database["public"]["Enums"]["recipe_difficulty"] | null
+          id?: string
+          image_url?: string | null
+          ingredients?: string[] | null
+          instructions?: string | null
+          is_featured?: boolean | null
+          long_desc?: string | null
+          prep_time?: number | null
+          servings?: number | null
+          short_desc?: string | null
+          slug?: string
+          title?: string
+          updated_at?: string | null
+          visible?: boolean | null
         }
         Relationships: []
       }
@@ -276,6 +354,7 @@ export type Database = {
       post_type: "oportunidade" | "servico"
       user_role: "ADMIN" | "FATURISTA" | "VENDEDOR"
       user_type: "profissional" | "empresario"
+      recipe_difficulty: "Fácil" | "Médio" | "Difícil"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -407,6 +486,7 @@ export const Constants = {
       post_type: ["oportunidade", "servico"],
       user_role: ["ADMIN", "FATURISTA", "VENDEDOR"],
       user_type: ["profissional", "empresario"],
+      recipe_difficulty: ["Fácil", "Médio", "Difícil"],
     },
   },
 } as const
