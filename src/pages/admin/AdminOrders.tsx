@@ -38,6 +38,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { usePedidos, useAtualizarStatusPedido, useExcluirPedido } from "@/hooks/usePedidos";
+import { mapStatusToDb, mapStatusToUiLabel, mapStatusToUiValue } from "@/lib/utils"; // Importar as funções de mapeamento
 
 const statusOptions = [
   { value: "all", label: "Todos os Status" },
@@ -61,15 +62,18 @@ const AdminOrders = () => {
                          pedido.cliente_info?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          pedido.cliente_info?.email?.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesStatus = statusFilter === "all" || pedido.status === statusFilter;
+    // Compara o status do DB com o filtro da UI, convertendo o status do DB para o valor da UI
+    const matchesStatus = statusFilter === "all" || mapStatusToUiValue(pedido.status) === statusFilter;
     
     return matchesSearch && matchesStatus;
   });
 
-  const handleStatusUpdate = async (pedidoId: string, newStatus: string) => {
+  const handleStatusUpdate = async (pedidoId: string, newUiStatus: string) => {
+    // Converte o status da UI para o formato do DB antes de enviar
+    const newDbStatus = mapStatusToDb(newUiStatus);
     atualizarStatusPedidoMutation.mutate({
       id: pedidoId,
-      status: newStatus as any
+      status: newDbStatus
     });
   };
 
@@ -77,14 +81,15 @@ const AdminOrders = () => {
     excluirPedidoMutation.mutate(pedidoId);
   };
 
-  const getStatusBadge = (status: string) => {
-    const statusOption = statusOptions.find(opt => opt.value === status);
+  const getStatusBadge = (dbStatus: string) => {
+    const uiLabel = mapStatusToUiLabel(dbStatus as any); // Converte o status do DB para o label da UI
+    const statusOption = statusOptions.find(opt => opt.label === uiLabel);
     if (!statusOption) return null;
 
     return (
       <Badge variant={statusOption.color as any}>
         {statusOption.icon && <statusOption.icon className="h-3 w-3 mr-1" />}
-        {statusOption.label}
+        {uiLabel}
       </Badge>
     );
   };
@@ -226,7 +231,7 @@ const AdminOrders = () => {
                               <div>
                                 <h4 className="font-semibold mb-2">Status do Pedido</h4>
                                 <Select 
-                                  value={selectedPedido.status} 
+                                  value={mapStatusToUiValue(selectedPedido.status)} // Exibe o valor da UI
                                   onValueChange={(value) => handleStatusUpdate(selectedPedido.id, value)}
                                 >
                                   <SelectTrigger className="w-full md:w-1/2">

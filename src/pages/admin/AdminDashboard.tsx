@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useProducts } from "@/hooks/useProducts";
 import { usePedidos } from "@/hooks/usePedidos"; // Importar o hook usePedidos
+import { mapStatusToUiLabel } from "@/lib/utils"; // Importar a função de mapeamento para labels
 
 const AdminDashboard = () => {
   const { data: products = [] } = useProducts();
@@ -20,8 +21,8 @@ const AdminDashboard = () => {
   });
 
   const totalRevenue = pedidos
-    .filter(pedido => pedido.status === 'entregue') // Usar status 'entregue'
-    .reduce((sum, pedido) => sum + (pedido.valor_total || 0), 0); // Usar valor_total
+    .filter(pedido => pedido.status === 'delivered') // Usar status 'delivered' (inglês)
+    .reduce((sum, pedido) => sum + (pedido.valor_total || 0), 0);
 
   const stats = [
     {
@@ -35,28 +36,28 @@ const AdminDashboard = () => {
       title: "Pedidos Hoje",
       value: todayOrders.length.toString(),
       icon: ShoppingCart,
-      change: `${pedidos.filter(o => o.status === 'pendente').length} pendentes`, // Usar status 'pendente'
+      change: `${pedidos.filter(o => o.status === 'pending').length} pendentes`, // Usar status 'pending' (inglês)
       changeType: "warning"
     },
     {
       title: "Total de Pedidos", 
       value: pedidos.length.toString(),
       icon: Users,
-      change: `${pedidos.filter(o => o.status === 'entregue').length} entregues`, // Usar status 'entregue'
+      change: `${pedidos.filter(o => o.status === 'delivered').length} entregues`, // Usar status 'delivered' (inglês)
       changeType: "positive"
     },
     {
       title: "Receita Total",
       value: `R$ ${totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
       icon: TrendingUp,
-      change: `${pedidos.filter(o => o.status === 'entregue').length} pedidos`, // Usar status 'entregue'
+      change: `${pedidos.filter(o => o.status === 'delivered').length} pedidos`, // Usar status 'delivered' (inglês)
       changeType: "positive"
     }
   ];
 
   const recentActivities = [
     ...pedidos.slice(0, 4).map(pedido => ({
-      action: `Pedido #${pedido.numero_pedido} - ${pedido.status}`, // Usar numero_pedido
+      action: `Pedido #${pedido.numero_pedido} - ${mapStatusToUiLabel(pedido.status)}`, // Usar mapStatusToUiLabel para exibir
       time: new Date(pedido.created_at).toLocaleDateString('pt-BR'),
       status: pedido.status
     }))
@@ -115,13 +116,11 @@ const AdminDashboard = () => {
                     <p className="text-sm text-muted-foreground">{activity.time}</p>
                   </div>
                   <Badge variant={
-                    activity.status === 'entregue' ? 'default' : // Usar status 'entregue'
-                    activity.status === 'pendente' ? 'secondary' : // Usar status 'pendente'
-                    activity.status === 'confirmado' ? 'default' : 'destructive' // Usar status 'confirmado' e 'cancelado'
+                    activity.status === 'delivered' ? 'default' : // Usar status 'delivered'
+                    activity.status === 'pending' ? 'secondary' : // Usar status 'pending'
+                    activity.status === 'confirmed' ? 'default' : 'destructive' // Usar status 'confirmed' e 'cancelled'
                   }>
-                    {activity.status === 'entregue' ? 'Entregue' :
-                     activity.status === 'pendente' ? 'Pendente' :
-                     activity.status === 'confirmado' ? 'Confirmado' : 'Cancelado'}
+                    {mapStatusToUiLabel(activity.status)} {/* Exibe o label em português */}
                   </Badge>
                 </div>
               ))
