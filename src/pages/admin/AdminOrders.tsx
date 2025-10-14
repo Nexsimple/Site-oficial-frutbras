@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Eye, Package, Truck, CheckCircle, XCircle, User, Mail, Phone, Building, Trash2, MapPin, Home, FileText } from "lucide-react";
+import { Search, Eye, Package, Truck, CheckCircle, XCircle, User, Mail, Phone, Building, Trash2, MapPin, Home, FileText, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -209,6 +209,10 @@ const AdminOrders = () => {
                                     <p className="flex items-center"><Mail className="h-4 w-4 mr-2 text-muted-foreground" /> {selectedPedido.cliente_info?.email || 'N/A'}</p>
                                     <p className="flex items-center"><Phone className="h-4 w-4 mr-2 text-muted-foreground" /> {selectedPedido.cliente_info?.phone || 'N/A'}</p>
                                     <p className="flex items-center"><FileText className="h-4 w-4 mr-2 text-muted-foreground" /> {selectedPedido.cliente_info?.document || 'N/A'}</p>
+                                    {/* Adicionar o campo Vendedor aqui */}
+                                    {selectedPedido.cliente_info?.utmCampaign && (
+                                      <p className="flex items-center"><User className="h-4 w-4 mr-2 text-muted-foreground" /> Vendedor: {selectedPedido.cliente_info.utmCampaign}</p>
+                                    )}
                                   </div>
                                 </div>
                                 

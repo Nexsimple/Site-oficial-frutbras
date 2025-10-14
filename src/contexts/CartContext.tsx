@@ -135,11 +135,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       // Não precisamos tentar obter a sessão do Supabase para este propósito.
       const userId = null; 
 
+      // Capturar utm_campaign da URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const utmCampaign = urlParams.get('utm_campaign');
+
       const orderData = {
         cliente_info: {
           ...customerInfo,
           totalItems: cart.totalItems,
           timestamp: new Date().toISOString(),
+          ...(utmCampaign && { utmCampaign }), // Adiciona utmCampaign se existir
         },
         itens: cart.items.map(item => ({
           product_id: item.product.id,
