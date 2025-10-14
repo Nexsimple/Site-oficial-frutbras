@@ -82,36 +82,41 @@ function cartReducer(state: Cart & { utmCampaign?: string }, action: CartAction)
   }
 }
 
+// Função de inicialização para useReducer
+const initializeCart = (initialState: Cart & { utmCampaign?: string }): Cart & { utmCampaign?: string } => {
+  let state = initialState;
+  
+  // 1. Tenta carregar o estado persistido
+  const savedCart = localStorage.getItem("frutbras-cart");
+  if (savedCart) {
+    try {
+      state = JSON.parse(savedCart);
+    } catch (error) {
+      console.error("Error loading cart from localStorage:", error);
+    }
+  }
+
+  // 2. Tenta ler o utm_campaign da URL (sobrescreve o valor persistido se houver um novo)
+  const urlParams = new URLSearchParams(window.location.search);
+  const utmCampaignFromUrl = urlParams.get('utm_campaign');
+
+  if (utmCampaignFromUrl) {
+    state.utmCampaign = utmCampaignFromUrl;
+  }
+  
+  // 3. Persiste o estado inicial imediatamente (incluindo o utmCampaign da URL)
+  localStorage.setItem("frutbras-cart", JSON.stringify(state));
+
+  return state;
+};
+
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [cartState, dispatch] = useReducer(cartReducer, { items: [], total: 0, totalItems: 0, utmCampaign: undefined });
+  const [cartState, dispatch] = useReducer(cartReducer, { items: [], total: 0, totalItems: 0, utmCampaign: undefined }, initializeCart);
   const { toast } = useToast();
 
+  // O useEffect agora só é responsável por persistir mudanças subsequentes
   useEffect(() => {
-    const savedCart = localStorage.getItem("frutbras-cart");
-    let initialCart = { items: [], total: 0, totalItems: 0, utmCampaign: undefined };
-
-    if (savedCart) {
-      try {
-        initialCart = JSON.parse(savedCart);
-      } catch (error) {
-        console.error("Error loading cart from localStorage:", error);
-      }
-    }
-
-    // 1. Tenta ler o utm_campaign da URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const utmCampaignFromUrl = urlParams.get('utm_campaign');
-
-    // 2. Se encontrado na URL, sobrescreve o valor persistido
-    if (utmCampaignFromUrl) {
-      initialCart.utmCampaign = utmCampaignFromUrl;
-    }
-    
-    dispatch({ type: "LOAD_CART", payload: initialCart });
-  }, []);
-
-  useEffect(() => {
-    // Persiste o estado completo, incluindo utmCampaign
     localStorage.setItem("frutbras-cart", JSON.stringify(cartState));
   }, [cartState]);
 
