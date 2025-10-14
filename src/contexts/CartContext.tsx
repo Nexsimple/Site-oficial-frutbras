@@ -2,7 +2,7 @@ import React, { createContext, useContext, useReducer, useEffect } from "react";
 import { Cart, CartItem, Product, CustomerInfo } from "@/types/products";
 import { useToast } from "@/hooks/use-toast";
 import { pedidosService } from "@/services/pedidos";
-import { supabase } from "@/integrations/supabase/client"; // Importar o cliente Supabase
+import { supabase } from "@/integrations/supabase/client";
 
 interface CartContextType {
   cart: Cart;
@@ -18,11 +18,11 @@ type CartAction =
   | { type: "REMOVE_ITEM"; payload: string }
   | { type: "UPDATE_QUANTITY"; payload: { productId: string; quantity: number } }
   | { type: "CLEAR_CART" }
-  | { type: "LOAD_CART"; payload: Cart };
+  | { type: "LOAD_CART"; payload: Cart & { utmCampaign?: string } };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-function cartReducer(state: Cart, action: CartAction): Cart {
+function cartReducer(state: Cart & { utmCampaign?: string }, action: CartAction): Cart & { utmCampaign?: string } {
   switch (action.type) {
     case "ADD_ITEM": {
       const { product, quantity, option } = action.payload;
@@ -44,7 +44,7 @@ function cartReducer(state: Cart, action: CartAction): Cart {
       const total = newItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
       const totalItems = newItems.reduce((sum, item) => sum + item.quantity, 0);
 
-      return { items: newItems, total, totalItems };
+      return { ...state, items: newItems, total, totalItems };
     }
 
     case "REMOVE_ITEM": {
@@ -52,7 +52,7 @@ function cartReducer(state: Cart, action: CartAction): Cart {
       const total = newItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
       const totalItems = newItems.reduce((sum, item) => sum + item.quantity, 0);
 
-      return { items: newItems, total, totalItems };
+      return { ...state, items: newItems, total, totalItems };
     }
 
     case "UPDATE_QUANTITY": {
@@ -67,14 +67,15 @@ function cartReducer(state: Cart, action: CartAction): Cart {
       const total = newItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
       const totalItems = newItems.reduce((sum, item) => sum + item.quantity, 0);
 
-      return { items: newItems, total, totalItems };
+      return { ...state, items: newItems, total, totalItems };
     }
 
     case "CLEAR_CART":
-      return { items: [], total: 0, totalItems: 0 };
+      // Mantém o utmCampaign ao limpar o carrinho, caso o usuário faça outro pedido
+      return { ...state, items: [], total: 0, totalItems: 0 };
 
     case "LOAD_CART":
-      return action.payload;
+      return { ...action.payload, utmCampaign: action.payload.utmCampaign };
 
     default:
       return state;
@@ -82,24 +83,37 @@ function cartReducer(state: Cart, action: CartAction): Cart {
 }
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [cart, dispatch] = useReducer(cartReducer, { items: [], total: 0, totalItems: 0 });
+  const [cartState, dispatch] = useReducer(cartReducer, { items: [], total: 0, totalItems: 0, utmCampaign: undefined });
   const { toast } = useToast();
 
   useEffect(() => {
     const savedCart = localStorage.getItem("frutbras-cart");
+    let initialCart = { items: [], total: 0, totalItems: 0, utmCampaign: undefined };
+
     if (savedCart) {
       try {
-        const parsedCart = JSON.parse(savedCart);
-        dispatch({ type: "LOAD_CART", payload: parsedCart });
+        initialCart = JSON.parse(savedCart);
       } catch (error) {
         console.error("Error loading cart from localStorage:", error);
       }
     }
+
+    // 1. Tenta ler o utm_campaign da URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const utmCampaignFromUrl = urlParams.get('utm_campaign');
+
+    // 2. Se encontrado na URL, sobrescreve o valor persistido
+    if (utmCampaignFromUrl) {
+      initialCart.utmCampaign = utmCampaignFromUrl;
+    }
+    
+    dispatch({ type: "LOAD_CART", payload: initialCart });
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("frutbras-cart", JSON.stringify(cart));
-  }, [cart]);
+    // Persiste o estado completo, incluindo utmCampaign
+    localStorage.setItem("frutbras-cart", JSON.stringify(cartState));
+  }, [cartState]);
 
   const addToCart = (product: Product, quantity: number, option: "pacote" | "caixa" | "kg" | "unidade") => {
     dispatch({ type: "ADD_ITEM", payload: { product, quantity, option } });
@@ -133,18 +147,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     try {
       const userId = null; 
 
-      const urlParams = new URLSearchParams(window.location.search);
-      const utmCampaign = urlParams.get('utm_campaign');
-      console.log("UTM Campaign capturada:", utmCampaign); // Adicionado para depuração
+      // Usa o utmCampaign persistido no estado do carrinho
+      const utmCampaign = cartState.utmCampaign;
 
       const orderData = {
         cliente_info: {
           ...customerInfo,
-          totalItems: cart.totalItems,
+          totalItems: cartState.totalItems,
           timestamp: new Date().toISOString(),
           ...(utmCampaign && { utmCampaign }),
         },
-        itens: cart.items.map(item => ({
+        itens: cartState.items.map(item => ({
           product_id: item.product.id,
           product_name: item.product.name,
           quantity: item.quantity,
@@ -152,7 +165,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           price: item.product.price,
           total: item.product.price * item.quantity
         })),
-        valor_total: cart.total,
+        valor_total: cartState.total,
         status: 'pendente' as const,
         user_id: userId,
       };
@@ -179,7 +192,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   return (
     <CartContext.Provider
       value={{
-        cart,
+        cart: cartState,
         addToCart,
         removeFromCart,
         updateQuantity,
