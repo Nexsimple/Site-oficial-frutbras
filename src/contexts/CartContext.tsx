@@ -131,20 +131,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const createOrder = async (customerInfo: CustomerInfo) => {
     try {
-      // Como todos os pedidos de clientes são anônimos, o user_id deve ser sempre NULL.
-      // Não precisamos tentar obter a sessão do Supabase para este propósito.
       const userId = null; 
 
-      // Capturar utm_campaign da URL
       const urlParams = new URLSearchParams(window.location.search);
       const utmCampaign = urlParams.get('utm_campaign');
+      console.log("UTM Campaign capturada:", utmCampaign); // Adicionado para depuração
 
       const orderData = {
         cliente_info: {
           ...customerInfo,
           totalItems: cart.totalItems,
           timestamp: new Date().toISOString(),
-          ...(utmCampaign && { utmCampaign }), // Adiciona utmCampaign se existir
+          ...(utmCampaign && { utmCampaign }),
         },
         itens: cart.items.map(item => ({
           product_id: item.product.id,
@@ -156,7 +154,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         })),
         valor_total: cart.total,
         status: 'pendente' as const,
-        user_id: userId, // Agora sempre será NULL
+        user_id: userId,
       };
 
       await pedidosService.criarPedido(orderData);
