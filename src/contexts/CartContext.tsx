@@ -44,7 +44,7 @@ function cartReducer(state: Cart & { utmCampaign?: string }, action: CartAction)
       const total = newItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
       const totalItems = newItems.reduce((sum, item) => sum + item.quantity, 0);
 
-      return { ...state, items: newItems, total, totalItems };
+      return { ...state, items: newItems, total, totalItems, utmCampaign: state.utmCampaign };
     }
 
     case "REMOVE_ITEM": {
@@ -52,7 +52,7 @@ function cartReducer(state: Cart & { utmCampaign?: string }, action: CartAction)
       const total = newItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
       const totalItems = newItems.reduce((sum, item) => sum + item.quantity, 0);
 
-      return { ...state, items: newItems, total, totalItems };
+      return { ...state, items: newItems, total, totalItems, utmCampaign: state.utmCampaign };
     }
 
     case "UPDATE_QUANTITY": {
@@ -67,15 +67,15 @@ function cartReducer(state: Cart & { utmCampaign?: string }, action: CartAction)
       const total = newItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
       const totalItems = newItems.reduce((sum, item) => sum + item.quantity, 0);
 
-      return { ...state, items: newItems, total, totalItems };
+      return { ...state, items: newItems, total, totalItems, utmCampaign: state.utmCampaign };
     }
 
     case "CLEAR_CART":
       // Mantém o utmCampaign ao limpar o carrinho, caso o usuário faça outro pedido
-      return { ...state, items: [], total: 0, totalItems: 0 };
+      return { ...state, items: [], total: 0, totalItems: 0, utmCampaign: state.utmCampaign };
 
     case "LOAD_CART":
-      return { ...action.payload, utmCampaign: action.payload.utmCampaign };
+      return { ...action.payload };
 
     default:
       return state;
@@ -149,6 +149,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
       // Usa o utmCampaign persistido no estado do carrinho
       const utmCampaign = cartState.utmCampaign;
+      
+      // LOG DE CONFIRMAÇÃO
+      console.log("Enviando pedido. utmCampaign:", utmCampaign);
 
       const orderData = {
         cliente_info: {
