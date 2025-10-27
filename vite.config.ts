@@ -11,11 +11,15 @@ export default defineConfig(({ mode }) => ({
     strictPort: true, // ← Garante que use a porta especificada
   },
   preview: {
-    host: true,
-    port: 8080,
-    strictPort: true, // ← Garante que use a porta especificada
-    allowedHosts: ['frutbras.onrender.com', 'localhost'] // ← Hosts permitidos
-  },
+  host: true,
+  port: 8080,
+  strictPort: true,
+  allowedHosts: [
+    'frutbras.onrender.com',
+    'localhost',
+    'site-oficial-frutbras-ksh2.onrender.com' // ← Adicionado aqui
+  ]
+},
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
     alias: {
