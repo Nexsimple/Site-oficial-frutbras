@@ -7,14 +7,20 @@ import { componentTagger } from "lovable-tagger";
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
-    port: process.env.PORT ? parseInt(process.env.PORT) : 8080, // Use PORT env var or default to 8080
-    strictPort: true, // ← Garante que use a porta especificada
+    port: process.env.PORT ? parseInt(process.env.PORT) : 8080,
+    strictPort: true,
   },
   preview: {
     host: true,
-    port: process.env.PORT ? parseInt(process.env.PORT) : 8080, // Use PORT env var or default to 8080
-    strictPort: true, // ← Garante que use a porta especificada
-    allowedHosts: ['frutbras.store', 'localhost'] // ← Hosts permitidos
+    port: process.env.PORT ? parseInt(process.env.PORT) : 8080,
+    strictPort: true,
+    allowedHosts: [
+      'frutbras.store',
+      'www.frutbras.store',
+      '.frutbras.store',  // ← Aceita qualquer subdomínio
+      'localhost',
+      '.onrender.com'      // ← Aceita domínio do Render também
+    ]
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
@@ -27,7 +33,7 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     outDir: 'dist',
-    sourcemap: mode === 'development', // ← Só gera sourcemap em desenvolvimento
-    minify: mode === 'production', // ← Minifica só em produção
+    sourcemap: mode === 'development',
+    minify: mode === 'production',
   }
 }));
