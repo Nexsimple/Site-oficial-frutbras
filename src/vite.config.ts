@@ -14,7 +14,7 @@ export default defineConfig(({ mode }) => ({
     host: true,
     port: process.env.PORT ? parseInt(process.env.PORT) : 8080, // Use PORT env var or default to 8080
     strictPort: true, // ← Garante que use a porta especificada
-    allowedHosts: ['frutbras.onrender.com', 'localhost'] // ← Hosts permitidos
+    allowedHosts: ['frutbras.store', 'localhost'] // ← Hosts permitidos
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
